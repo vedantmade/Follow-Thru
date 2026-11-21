@@ -1,0 +1,19 @@
+# Sprint Sync — FitTrack launch | 2026-11-21 | Attendees: Rahul, Amit, Neha, Karan (Priya absent)
+[00:00:03] Rahul: Hi everyone, let's start. Priya couldn't join today, she's travelling, so let's go ahead without her.
+[00:00:12] Karan: Sure. I've got the new onboarding designs ready to show later.
+[00:00:20] Rahul: Great. First, the database. I've been looking at our workout logs and they're growing really fast. I think we should switch to MongoDB instead of Postgres, it scales out much more easily.
+[00:00:41] Amit: Hmm, that's a big change, but okay, MongoDB works for me if it helps us scale.
+[00:00:50] Rahul: Cool, then it's decided. We go with MongoDB.
+[00:01:02] Neha: Next thing, the influencer partner moved their slot. Can we launch on December 5th instead of the 10th?
+[00:01:14] Rahul: Yeah, December 5th works. Let's do that.
+[00:01:22] Rahul: Amit, you'll need to migrate the user service to the MongoDB driver. Can you finish that by Friday?
+[00:01:31] Amit: Yes, I'll have it done by Friday.
+[00:01:38] Rahul: We also need a beta signup form on the landing page before the launch. Can you handle that?
+[00:01:46] Karan: On it. I'll ship the signup form by Wednesday EOD.
+[00:01:55] Neha: For payments, Amit knows Razorpay best. He should also check the refund flow before launch.
+[00:02:06] Amit: Okay, noted.
+[00:02:10] Karan: And I'll share the final onboarding screens with everyone by Tuesday.
+[00:02:18] Rahul: Perfect. Main kal tak load testing script bhej dunga, phir sab dekh lena.
+[00:02:27] Amit: One more thing, the dashboard API has become really slow. We should fix the API soon.
+[00:02:36] Rahul: Yeah, someone should look into that.
+[00:02:42] Rahul: Okay, that's all for today. Thanks everyone!

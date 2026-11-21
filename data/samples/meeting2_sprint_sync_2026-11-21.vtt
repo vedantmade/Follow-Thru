@@ -1,0 +1,61 @@
+WEBVTT
+
+1
+00:00:04.000 --> 00:00:12.000
+<v Rahul>Priya couldn't join today, let's go ahead anyway.</v>
+
+2
+00:00:15.000 --> 00:00:38.000
+<v Rahul>I've been thinking about scale. We should switch to MongoDB instead of Postgres, the workout logs are going to grow a lot and Mongo scales out more easily.</v>
+
+3
+00:00:40.000 --> 00:00:50.000
+<v Amit>Hmm, okay, MongoDB works for me if it helps us scale.</v>
+
+4
+00:00:52.000 --> 00:01:00.000
+<v Rahul>Cool, let's go with MongoDB then.</v>
+
+5
+00:01:30.000 --> 00:01:43.000
+<v Neha>Also, the influencer partner moved their slot. Can we launch on December 5th instead?</v>
+
+6
+00:01:45.000 --> 00:01:52.000
+<v Rahul>Yeah, December 5th works. Let's do that.</v>
+
+7
+00:02:20.000 --> 00:02:30.000
+<v Rahul>Amit, you'll need to migrate the user service to the MongoDB driver. Can you finish that by Friday?</v>
+
+8
+00:02:31.000 --> 00:02:36.000
+<v Amit>Yes, I'll have it done by Friday.</v>
+
+9
+00:03:05.000 --> 00:03:10.000
+<v Rahul>We also need a beta signup form on the landing page. Can you handle that?</v>
+
+10
+00:03:12.000 --> 00:03:20.000
+<v Neha>On it, I'll ship it by Wednesday EOD.</v>
+
+11
+00:03:40.000 --> 00:04:00.000
+<v Neha>For the payment integration, Amit knows Razorpay best. He should also check the refund flow before launch.</v>
+
+12
+00:04:05.000 --> 00:04:20.000
+<v Rahul>Main kal tak load testing script bhej dunga, phir sab dekh lena.</v>
+
+13
+00:04:30.000 --> 00:04:42.000
+<v Amit>The API is getting slow on the dashboard. We should fix the API soon.</v>
+
+14
+00:04:45.000 --> 00:04:50.000
+<v Rahul>Yeah, someone should look into that.</v>
+
+15
+00:05:10.000 --> 00:05:15.000
+<v Rahul>Okay, that's all for today. Thanks!</v>

@@ -1,0 +1,16 @@
+# Sprint Sync — FitTrack launch | 2026-11-14 | Attendees: Priya, Rahul, Amit, Neha
+[00:00:05] Rahul: Okay, let's start. Three things today: database, launch date, and pricing.
+[00:00:20] Priya: For the database, I think we should go with PostgreSQL. Our workout and payment data is very relational, we need proper joins and transactions.
+[00:01:02] Rahul: Makes sense. Anyone against Postgres?
+[00:01:10] Amit: No, Postgres is fine with me.
+[00:01:15] Rahul: Great, so that's decided, we go with PostgreSQL.
+[00:01:40] Priya: I'll set up the Postgres schema and migrations by next Wednesday.
+[00:02:30] Rahul: Now the launch date. Marketing wants a date locked.
+[00:02:45] Neha: The influencer campaign needs about three weeks of lead time.
+[00:03:05] Rahul: Then let's fix the public launch on December 10th. Final.
+[00:03:20] Neha: Okay, I'll write the launch blog post by the 30th.
+[00:04:00] Rahul: Pricing — we agreed on 499 rupees per month for Pro, right?
+[00:04:10] Amit: Yes, 499 a month, with a 7 day free trial.
+[00:04:18] Rahul: Amit, can you update the pricing page with that by Tuesday?
+[00:04:25] Amit: Sure, will do.
+[00:05:00] Rahul: Good meeting. Thanks everyone.
