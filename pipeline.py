@@ -15,7 +15,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 from agent import llm  # noqa: E402
 from agent.core import Agent  # noqa: E402
 from agent.prompts import CONFLICT_PROMPT, EXTRACTION_PROMPT, MEMORY_PROMPT  # noqa: E402
-from services import db, extraction, mailer, tracker  # noqa: E402
+from services import db, extraction, mailer, system1, tracker  # noqa: E402
 from services import transcript as tx  # noqa: E402
 
 db.init_db()
@@ -100,6 +100,15 @@ def process_transcript(text: str, filename: str = "", title: str = "", meeting_d
     trace.append({"type": "tool", "tool": "extract_meeting", "args": {"turns": len(turns)},
                   "result": f"{len(data['decisions'])} decisions, {len(data['action_items'])} action items ({vague} vague)"})
 
+    # --- System 1 (Laya) safety net: fast per-line screen, can only ADD review flags ---
+    screened = system1.screen(turns)
+    if screened:
+        s1_warnings = system1.cross_check(screened, data["action_items"], turns)
+        warnings += s1_warnings
+        n_commit = sum(v["kind"] == "commitment" for v in screened["labels"].values())
+        trace.append({"type": "tool", "tool": "system1_screen (Laya)", "args": {"turns": len(turns)},
+                      "result": f"{n_commit} commitment line(s) in {screened['ms']} ms; {len(s1_warnings)} extra review flag(s)"})
+
     # --- conflict check against memory ---
     conflicts = []
     candidates = {}
@@ -145,7 +154,8 @@ def process_transcript(text: str, filename: str = "", title: str = "", meeting_d
 
     return {"meeting": {"title": title, "date": meeting_date, "attendees": attendees, "absent": absent},
             "turns": turns, "decisions": data["decisions"], "action_items": data["action_items"],
-            "conflicts": conflicts, "warnings": warnings, "trace": trace, "_transcript": text}
+            "conflicts": conflicts, "warnings": warnings, "trace": trace, "_transcript": text,
+            "system1": {"status": system1.status(), "ms": screened["ms"] if screened else None}}
 
 
 # ---------------------------------------------------------------------------

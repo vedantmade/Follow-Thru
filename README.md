@@ -59,7 +59,7 @@ python seed.py --reset                               # loads the 14 Nov meeting 
 python try_pipeline.py data/samples/demo_meeting_2026-11-21.txt   # terminal test, no side effects
 python app.py                                        # http://127.0.0.1:7860
 ```
-Keys in `.env`: `GEMINI_API_KEY` (required), `GITHUB_TOKEN` + `GITHUB_REPO` (fine-grained token, Issues read/write), optional `GROQ_API_KEY` (fallback LLM) and `GMAIL_USER` + `GMAIL_APP_PASSWORD`. Without Gmail, emails are kept in the app's outbox.
+Keys in `.env`: `GROQ_API_KEY` or `GEMINI_API_KEY` (at least one), `GITHUB_TOKEN` + `GITHUB_REPO` (fine-grained token, Issues read/write) and `GMAIL_USER` + `GMAIL_APP_PASSWORD`. Without Gmail, emails are kept in the app's outbox.
 
 ## 6. Tech stack
 | Layer | Technology |
@@ -88,11 +88,20 @@ data/samples/       demo transcripts + expected outputs
 | Gradio UI, graph, AI integration in the UI | Siddhart Gupta, AI-assisted (Gemini Pro) |
 | Starter template (agent loop, LLM client) | AI-generated, prepared before the problem statement |
 
-## 9. Future scope
+## 9. v2 (after the hackathon): System 1 + System 2
+
+> The hackathon submission is frozen on the [`hackathon-submission`](https://github.com/vedantmade/Follow-Thru/tree/hackathon-submission) branch. Everything in this section was added **after** the deadline.
+
+- **System 1 (Laya)** is an optional fast decision model. It screens every transcript line ("commitment, decision or other?" and "clearly owned and time-bound, or vague?") in one batched pass.
+- It is a **safety net only**: it can add "needs review" flags (a commitment that looks vaguer than extracted, or a commitment the LLM missed), but it never removes, edits or approves anything. Laya's own documentation warns that its confidences are over-confident, so it uses a strict threshold (0.85).
+- It is **off by default** and runs locally only (~1.5 GB RAM): `pip install -r requirements-laya.txt` then set `LAYA_MODE=local`. If it is missing or fails, the app runs exactly as before.
+- **Deploy:** `render.yaml` deploys the app on Render's free plan (Laya stays off there).
+
+## 10. Future scope
 - **Live mode:** run the same agent on transcript chunks during the call: *"Before you leave: 2 action items have no owner."*
-- **System 1 + System 2:** a fast decision model (e.g. Laya) screens every line in milliseconds; the LLM handles only reasoning.
+- Use System 1 to pre-filter lines before the LLM call (cheaper, faster), once its accuracy is measured on real meetings.
 - Direct audio upload with speaker diarisation; Jira, Linear and Notion trackers; Slack reminders.
 
-## 10. Team
+## 11. Team
 - **Vedant Made** — Architecture and Backend ([GitHub](https://github.com/vedantmade) · [LinkedIn](https://linkedin.com/in/vedant-made))
 - **Siddhart Gupta** — UI and AI
