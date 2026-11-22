@@ -446,7 +446,7 @@ with gr.Blocks(title="FollowThru Enterprise | Meeting-to-Execution Agent") as de
         <div class="corp-header">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <div class="corp-brand-tag">Autonomous AI Governance · Linear/GitHub Integrated</div>
+                    <div class="corp-brand-tag">Meeting-to-Execution Agent · GitHub Issues Integrated</div>
                     <div style="font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px;">
                         <span>FollowThru</span>
                         <span style="font-weight: 300; color: #94A3B8;">|</span>
@@ -459,7 +459,7 @@ with gr.Blocks(title="FollowThru Enterprise | Meeting-to-Execution Agent") as de
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
                     <div class="corp-env-pill">
                         <span class="corp-env-dot"></span>
-                        <span>Workspace: <strong>FitTrack Product Team</strong> &middot; Sprint 24</span>
+                        <span>Demo workspace: <strong>FitTrack launch team</strong></span>
                     </div>
                 </div>
             </div>

@@ -4,6 +4,7 @@ Flow:  process_transcript()  ->  (human reviews in UI)  ->  execute()
        process_transcript saves NOTHING and posts NOTHING. execute() runs only after approval.
 """
 import json
+from concurrent.futures import ThreadPoolExecutor
 import os
 import re
 from datetime import date, datetime, timedelta
@@ -19,6 +20,8 @@ from services import db, extraction, mailer, system1, tracker  # noqa: E402
 from services import transcript as tx  # noqa: E402
 
 db.init_db()
+system1.warm_up()  # no-op unless LAYA_MODE=local
+_s1_pool = ThreadPoolExecutor(max_workers=1)
 if not db.list_meetings():  # fresh deploy -> load the 14 Nov meeting so conflicts can be demoed
     import seed
     seed.seed()
@@ -90,6 +93,8 @@ def process_transcript(text: str, filename: str = "", title: str = "", meeting_d
     # --- extraction (System 2 LLM) ---
     system = _fill(EXTRACTION_PROMPT, MEETING_DATE=meeting_date, WEEKDAY=weekday, ATTENDEES=", ".join(attendees),
                    DATE_TABLE=_date_table(meeting_date))
+    # System 1 (Laya) runs in parallel with the LLM call, so it adds little or no waiting time
+    s1_future = _s1_pool.submit(system1.screen, turns) if system1.MODE == "local" else None
     raw = _llm_json(system, tx.format_for_llm(turns))
     data, warnings = extraction.validate(raw, attendees)
     for i, d in enumerate(data["decisions"]):
@@ -101,13 +106,14 @@ def process_transcript(text: str, filename: str = "", title: str = "", meeting_d
                   "result": f"{len(data['decisions'])} decisions, {len(data['action_items'])} action items ({vague} vague)"})
 
     # --- System 1 (Laya) safety net: fast per-line screen, can only ADD review flags ---
-    screened = system1.screen(turns)
+    screened = s1_future.result() if s1_future else None
     if screened:
         s1_warnings = system1.cross_check(screened, data["action_items"], turns)
         warnings += s1_warnings
         n_commit = sum(v["kind"] == "commitment" for v in screened["labels"].values())
         trace.append({"type": "tool", "tool": "system1_screen (Laya)", "args": {"turns": len(turns)},
-                      "result": f"{n_commit} commitment line(s) in {screened['ms']} ms; {len(s1_warnings)} extra review flag(s)"})
+                      "result": f"screened {screened['screened']}/{screened['total']} lines in {screened['ms']} ms (parallel with LLM); "
+                                f"{n_commit} commitment(s), {len(s1_warnings)} extra review flag(s)"})
 
     # --- conflict check against memory ---
     conflicts = []
@@ -338,6 +344,14 @@ def list_people() -> list[str]:
 
 
 def reset_demo() -> None:
+    """Restore the 14 Nov memory and close demo issues from earlier runs (seed issues stay open)."""
     import seed
+    if tracker.configured():
+        try:
+            for issue in tracker.list_open_issues("meeting-agent"):
+                if "seed" not in issue["labels"]:
+                    tracker.close_issue(issue["number"], reason="not_planned")
+        except Exception as e:  # noqa: BLE001 — cleanup must never block the reset
+            print(f"[reset] closing old demo issues skipped: {e}")
     db.reset_db()
     seed.seed()

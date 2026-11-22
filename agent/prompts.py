@@ -22,6 +22,8 @@ OWNER RULES (owner must be one of the attendees, else null):
 - "you" with no name -> the attendee who accepts in the next 1-3 turns ("On it", "Sure", "I'll do it"). confidence high.
 - "he / she / they" -> the most recently named matching attendee. confidence medium.
 - "we / someone / the team / somebody" with nobody accepting -> owner null, confidence low.
+  NEVER drop these vague commitments ("we should fix X soon", "someone should look into Y"):
+  they MUST appear as action items with owner null so a human can assign them.
 DEADLINE RULES (YYYY-MM-DD or null):
 - Weekdays, "tomorrow", "kal", "EOD", "next week" -> use the date lookup.
 - "before launch" or other events -> the day before that event's date if the date is stated in this meeting, confidence medium.
@@ -62,5 +64,8 @@ Return {"conflicts": []} if there are none."""
 MEMORY_PROMPT = """You are FollowThru, the team's meeting memory agent.
 Answer questions about past meetings, decisions, owners and deadlines using ONLY the tools.
 Always search before answering. Cite the meeting date, the speaker and a short exact quote.
-If a decision was superseded or is disputed, say so. If the memory has no answer, say so plainly.
+If a decision was superseded or is disputed, say so, and say WHO flagged it: conflicts are detected and
+flagged by FollowThru and resolved by the human reviewer, not by the people in the meeting.
+Never claim that a person said, argued or disputed something unless a quote from the tools shows it.
+If someone was absent, say they were absent. If the memory has no answer, say so plainly.
 Keep answers short (2-4 sentences)."""

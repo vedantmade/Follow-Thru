@@ -10,6 +10,8 @@ Enable locally:  pip install -r requirements-laya.txt   and set  LAYA_MODE=local
 Disabled (default) or unavailable -> every function returns None and the app runs exactly as before.
 """
 import os
+import re
+import threading
 import time
 
 MODE = os.getenv("LAYA_MODE", "off").lower()          # off | local
@@ -37,21 +39,36 @@ QUESTIONS = {
     },
 }
 
+# Only lines that could hold a task or decision are screened (greetings, thanks etc. are skipped).
+CANDIDATE = re.compile(
+    r"\b(i'?ll|i will|we'?ll|we will|we should|someone|somebody|can you|could you|will you|you'?ll|need to|"
+    r"should|let'?s|decided|go with|on it|sure|by (mon|tues|wednes|thurs|fri|satur|sun)day|tomorrow|"
+    r"eod|deadline|kal|karunga|karungi|dunga|dungi|bhej|kar dunga)\b", re.I)
+
 _router = None
 _error = None
+_lock = threading.Lock()
 
 
 def _load():
     global _router, _error
-    if _router is not None or _error is not None:
+    with _lock:  # app warm-up thread and a request may race here
+        if _router is not None or _error is not None:
+            return _router
+        try:
+            from laya import Router
+            # One pinned checkpoint, at most one in memory: no loading/unloading between lines.
+            _router = Router(default=CHECKPOINT, max_loaded=1)
+        except Exception as e:  # noqa: BLE001 — missing package, no RAM, no download: just stay off
+            _error = f"{type(e).__name__}: {e}"
+            print(f"[system1] Laya unavailable, continuing without it: {_error}")
         return _router
-    try:
-        from laya import Router
-        _router = Router(default=CHECKPOINT, preload=True)
-    except Exception as e:  # noqa: BLE001 — missing package, no RAM, no download: just stay off
-        _error = f"{type(e).__name__}: {e}"
-        print(f"[system1] Laya unavailable, continuing without it: {_error}")
-    return _router
+
+
+def warm_up():
+    """Load Laya in the background at app start, so the first Process does not pay for it."""
+    if MODE == "local":
+        threading.Thread(target=_load, daemon=True).start()
 
 
 def status() -> str:
@@ -65,23 +82,30 @@ def _top(answer: dict):
 
 
 def screen(turns: list[dict]) -> dict | None:
-    """Classify every transcript turn. Returns None when Laya is off/unavailable."""
+    """Classify candidate transcript lines. Returns None when Laya is off/unavailable."""
+    global _router, _error
     if MODE != "local" or not _load():
         return None
     t0 = time.perf_counter()
-    requests = [{"state": f"{t['speaker']}: {t['text']}", "questions": QUESTIONS} for t in turns]
+    candidates = [t for t in turns if CANDIDATE.search(t["text"])]
+    if not candidates:
+        return {"labels": {}, "ms": 0, "checkpoint": CHECKPOINT, "screened": 0, "total": len(turns)}
+    requests = [{"state": f"{t['speaker']}: {t['text']}", "questions": QUESTIONS, "model": CHECKPOINT}
+                for t in candidates]
     try:
         results = _router.predict_batch(requests)
-    except Exception as e:  # noqa: BLE001
-        print(f"[system1] predict_batch failed, skipping: {e}")
+    except Exception as e:  # noqa: BLE001 — e.g. model files or torch missing: switch off for this run
+        _error, _router = f"{type(e).__name__}: {e}", None
+        print(f"[system1] Laya failed, continuing without it: {_error}")
         return None
     labels = {}
-    for t, r in zip(turns, results):
+    for t, r in zip(candidates, results):
         ans = (r or {}).get("answers") or {}
         kind, kind_conf = _top(ans.get("kind"))
         clarity, clarity_conf = _top(ans.get("clarity"))
         labels[t["id"]] = {"kind": kind, "kind_conf": kind_conf, "clarity": clarity, "clarity_conf": clarity_conf}
-    return {"labels": labels, "ms": round((time.perf_counter() - t0) * 1000), "checkpoint": CHECKPOINT}
+    return {"labels": labels, "ms": round((time.perf_counter() - t0) * 1000), "checkpoint": CHECKPOINT,
+            "screened": len(candidates), "total": len(turns)}
 
 
 def cross_check(screened: dict | None, action_items: list[dict], turns: list[dict]) -> list[str]:

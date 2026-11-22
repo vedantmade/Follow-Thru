@@ -35,7 +35,7 @@ def issue_body(task, owner, deadline, meeting_title, meeting_date, quote, speake
     return (f"**Owner:** {owner}\n**Due:** {deadline or 'not set'}\n"
             f"**From meeting:** {meeting_title} ({meeting_date})\n\n"
             f"> {quote}" + (f"\n> — {speaker}" if speaker else "") +
-            "\n\n_Created by Meeting-to-Execution Agent after human approval._")
+            "\n\n_Created by FollowThru after human approval._")
 
 
 def create_issue(title, body, labels=("meeting-agent",)):
@@ -59,6 +59,13 @@ def find_issue_by_title(title):
         if issue["title"] == title:
             return issue["number"], issue["html_url"]
     return None
+
+
+def list_open_issues(label="meeting-agent"):
+    """Open issues with a label: [{'number', 'title', 'labels': [...]}]."""
+    data = _call("GET", f"/repos/{_repo()}/issues", params={"state": "open", "labels": label, "per_page": 100})
+    return [{"number": i["number"], "title": i["title"], "labels": [lb["name"] for lb in i.get("labels", [])]}
+            for i in data if "pull_request" not in i]
 
 
 def configured():
