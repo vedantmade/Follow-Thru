@@ -4,7 +4,7 @@
 
 > Meeting tools tell you what was said. **FollowThru tells you what changed, what it breaks, and who needs to act** — and waits for your approval before touching anything.
 
-**Live demo:** `<Hugging Face Space link>` · **Demo video:** `<Drive link>` · **Task tracker:** `<github.com/you/meeting-tasks>`
+**Live demo:** https://followthru-hrhc.onrender.com (free hosting: the first visit after idle time takes ~1 min to wake up) · **Demo video:** `<Drive link>` · **Task tracker:** https://github.com/vedantmade/meeting-tasks
 
 ---
 
