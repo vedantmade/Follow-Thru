@@ -1,0 +1,23 @@
+# One-click deploy on Render (free web service). Laya stays off here: the free plan has 512 MB RAM.
+services:
+  - type: web
+    name: followthru
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: LLM_PROVIDER
+        value: groq
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: LAYA_MODE
+        value: "off"
+      - key: GITHUB_REPO
+        value: vedantmade/meeting-tasks
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false

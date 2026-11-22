@@ -446,7 +446,7 @@ with gr.Blocks(title="FollowThru Enterprise | Meeting-to-Execution Agent") as de
         <div class="corp-header">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <div class="corp-brand-tag">Autonomous AI Governance · Linear/GitHub Integrated</div>
+                    <div class="corp-brand-tag">Meeting-to-Execution Agent · GitHub Issues Integrated</div>
                     <div style="font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px;">
                         <span>FollowThru</span>
                         <span style="font-weight: 300; color: #94A3B8;">|</span>
@@ -459,7 +459,7 @@ with gr.Blocks(title="FollowThru Enterprise | Meeting-to-Execution Agent") as de
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
                     <div class="corp-env-pill">
                         <span class="corp-env-dot"></span>
-                        <span>Workspace: <strong>FitTrack Product Team</strong> &middot; Sprint 24</span>
+                        <span>Demo workspace: <strong>FitTrack launch team</strong></span>
                     </div>
                 </div>
             </div>
@@ -815,7 +815,10 @@ with gr.Blocks(title="FollowThru Enterprise | Meeting-to-Execution Agent") as de
             success_html = (
                 "<div style='color: #0F766E; font-weight: 600; padding: 10px 14px; background: #F0FDFA; border: 1px solid #99F6E4; border-radius: 8px; margin-top: 10px;'>"
                 f"⚡ Transcript processed: {n_dec} decision(s), {n_act} action item(s), {n_conf} conflict(s). Opening the Review tab..."
-                "</div>"
+                f"<div style='font-weight: 500; font-size: 0.85rem; margin-top: 4px;'>System 1 (Laya) safety net: "
+                f"{(proposal.get('system1') or {}).get('status', 'off')}"
+                + (f" · screened in {proposal['system1']['ms']} ms" if (proposal.get('system1') or {}).get('ms') is not None else "")
+                + "</div></div>"
             )
 
             return (
@@ -1231,4 +1234,8 @@ with gr.Blocks(title="FollowThru Enterprise | Meeting-to-Execution Agent") as de
 
 
 if __name__ == "__main__":
-    demo.launch(theme=custom_theme, css=CUSTOM_CSS)  # host/port come from env, so it works locally and on Hugging Face
+    # Cloud hosts (Render etc.) give a PORT and need 0.0.0.0; locally this stays 127.0.0.1:7860
+    port = os.getenv("PORT")
+    demo.launch(theme=custom_theme, css=CUSTOM_CSS,
+                server_name="0.0.0.0" if port else None,
+                server_port=int(port) if port else None)

@@ -127,7 +127,18 @@ def list_tasks(owner: str = ""):
             for a in db.list_action_items(owner=owner or None)] or "No tasks."
 
 
-@tool("List detected conflicts between decisions and how the team resolved them.")
+@tool("List conflicts FollowThru detected between decisions, with both decisions and the reviewer's resolution.")
 def list_conflicts():
     from services import db
-    return db.list_conflicts() or "No conflicts recorded."
+    decisions = {d["id"]: d for d in db.list_decisions(status=None)}
+    out = []
+    for c in db.list_conflicts():
+        old, new = decisions.get(c["old_decision_id"], {}), decisions.get(c["new_decision_id"], {})
+        attendees = new.get("meeting_attendees") or ""
+        out.append({
+            "old_decision": old.get("text"), "old_decided_by": old.get("speaker"), "old_date": old.get("meeting_date"),
+            "new_decision": new.get("text"), "new_decided_by": new.get("speaker"), "new_date": new.get("meeting_date"),
+            "old_decider_present_at_new_meeting": bool(old.get("speaker")) and old["speaker"] in attendees,
+            "detected_by": "FollowThru conflict check", "reviewer_choice": c["choice"], "explanation": c["explanation"],
+        })
+    return out or "No conflicts recorded."

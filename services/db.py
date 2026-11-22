@@ -7,6 +7,7 @@ import json
 import os
 import re
 import sqlite3
+from contextlib import closing
 from datetime import datetime
 
 DB_PATH = os.getenv("DB_PATH", os.path.join(os.path.dirname(__file__), "..", "data", "meetings.db"))
@@ -45,7 +46,7 @@ def connect():
 
 
 def init_db():
-    with connect() as c:
+    with closing(connect()) as c, c:
         c.executescript(SCHEMA)
 
 
@@ -54,14 +55,14 @@ def _rows(cur):
 
 
 def _q(sql, args=()):
-    with connect() as c:
+    # closing() closes the connection; the inner "c" commits. Without closing, Windows keeps the file locked.
+    with closing(connect()) as c, c:
         return _rows(c.execute(sql, args))
 
 
 def _x(sql, args=()):
-    with connect() as c:
-        cur = c.execute(sql, args)
-        return cur.lastrowid
+    with closing(connect()) as c, c:
+        return c.execute(sql, args).lastrowid
 
 
 # ---------------- meetings ----------------
@@ -216,6 +217,8 @@ def digest_data(person, today: str | None = None):
 
 
 def reset_db():
-    if os.path.exists(DB_PATH):
-        os.remove(DB_PATH)
+    """Empty the memory by dropping tables (deleting the file fails on Windows while the app runs)."""
+    tables = ["outbox", "conflicts", "reminders", "action_items", "decisions", "meetings", "people"]
+    with closing(connect()) as c, c:
+        c.executescript("".join(f"DROP TABLE IF EXISTS {t};" for t in tables))
     init_db()

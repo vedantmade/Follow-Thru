@@ -1,0 +1,3 @@
+# Optional System 1 (Laya). Local machines only: needs ~1.5 GB RAM and a one-time model download.
+-r requirements.txt
+laya>=0.5

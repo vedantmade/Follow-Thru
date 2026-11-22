@@ -22,7 +22,7 @@ def send(recipient_name, subject, body, override_to=None):
         status = "outbox only (email sending not configured)"
     else:
         msg = EmailMessage()
-        msg["From"], msg["To"], msg["Subject"] = f"Meeting Agent <{user}>", to, subject
+        msg["From"], msg["To"], msg["Subject"] = f"FollowThru <{user}>", to, subject
         msg.set_content(body)
         try:
             with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=20) as s:
