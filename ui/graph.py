@@ -29,7 +29,7 @@ def render_graph(data: dict | None = None) -> str:
         notebook=False,
         cdn_resources="remote",
         bgcolor="#FAFAFC",
-        font_color="#0F1B3D"
+        font_color=False  # per-node fonts below (a global colour would override them)
     )
 
     for node in data.get("nodes", []):
@@ -66,10 +66,13 @@ def render_graph(data: dict | None = None) -> str:
             shape = "dot"
             size = 18
 
+        # Box labels sit INSIDE the navy box -> white. Dot labels sit BELOW the dot on a light page -> navy.
         font = {
-            "color": "#FFFFFF",
-            "size": 13,
-            "face": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+            "color": "#FFFFFF" if shape == "box" else "#0F1B3D",
+            "size": 14 if shape == "box" else 13,
+            "face": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+            "strokeWidth": 0 if shape == "box" else 3,
+            "strokeColor": "#FFFFFF",
         }
 
         status_badge_color = "#DC2626" if status in ("disputed", "at_risk") else ("#64748B" if status == "superseded" else "#0F766E")
@@ -91,6 +94,8 @@ def render_graph(data: dict | None = None) -> str:
             color=color,
             font=font,
             size=size,
+            widthConstraint={"maximum": 220} if shape == "box" else {"maximum": 180},
+            margin=10 if shape == "box" else 5,
             borderWidth=2,
             shadow={"enabled": True, "color": "rgba(0,0,0,0.12)", "size": 6, "x": 1, "y": 2}
         )

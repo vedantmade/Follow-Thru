@@ -316,7 +316,7 @@ def graph_data() -> dict:
     nodes, edges = [], []
     decisions = {d["id"]: d for d in db.list_decisions(status=None)}
     for d in decisions.values():
-        nodes.append({"id": f"d{d['id']}", "label": d["text"][:40], "type": "decision", "status": d["status"]})
+        nodes.append({"id": f"d{d['id']}", "label": d["text"][:80], "type": "decision", "status": d["status"]})
         if d["superseded_by"]:
             edges.append({"from": f"d{d['superseded_by']}", "to": f"d{d['id']}", "type": "supersedes"})
     for c in db.list_conflicts():
@@ -325,7 +325,7 @@ def graph_data() -> dict:
     for a in db.list_action_items(status=("approved", "done")):
         dec = decisions.get(a["decision_id"])
         at_risk = a["status"] == "approved" and dec and dec["status"] in ("superseded", "disputed")
-        nodes.append({"id": f"a{a['id']}", "label": f"{a['task'][:30]} ({a['owner']})", "type": "task",
+        nodes.append({"id": f"a{a['id']}", "label": f"{a['task'][:60]} ({a['owner']})", "type": "task",
                       "status": "at_risk" if at_risk else a["status"]})
         if dec:
             edges.append({"from": f"d{dec['id']}", "to": f"a{a['id']}", "type": "has_task"})
